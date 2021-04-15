@@ -11,7 +11,9 @@ import SwiftUI
 struct DrawSwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationView {
+                DrawRecognizer(viewModel: DrawRecognizerViewModel())
+            }
         }
     }
 }

@@ -19,3 +19,12 @@ struct SimpleShape {
     }
 }
 
+extension SimpleShape {
+    func changePoints(withRect rect:CGRect) -> Self {
+        let newPoints = points.map {
+            CGPoint(x: $0.x - rect.origin.x, y: $0.y - rect.origin.y)
+        }
+        return SimpleShape(points: newPoints, color: self.color, width: self.width)
+    }
+}
+

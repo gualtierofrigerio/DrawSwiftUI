@@ -19,9 +19,17 @@ class DrawShapesViewModel: ObservableObject {
         shapes.append(shape)
     }
     
+    func clear() {
+        shapes = []
+    }
+    
     func endShape(size:CGSize) {
         viewSize = size
         newShape()
+    }
+    
+    func getCGImage() -> CGImage? {
+        ImageUtils.imageFromShapes(shapes, size: viewSize).cgImage
     }
     
     func getImage() -> UIImage {
@@ -40,7 +48,7 @@ class DrawShapesViewModel: ObservableObject {
     }
     
     @discardableResult private func newShape() -> SimpleShape {
-        let newShape = SimpleShape(points: [], color: .blue, width: 3)
+        let newShape = SimpleShape(points: [], color: .black, width: 3)
         shapes.append(newShape)
         return newShape
     }
