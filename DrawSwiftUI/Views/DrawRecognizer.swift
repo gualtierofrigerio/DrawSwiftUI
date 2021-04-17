@@ -19,8 +19,20 @@ struct DrawRecognizer: View {
                 Text("Reset model")
                     .foregroundColor(Color.red)
             }
+            Button {
+                updateModel()
+            } label: {
+                HStack {
+                Text("Update model")
+                    if viewModel.showSpinner {
+                        Image(systemName: viewModel.spinnerValue)
+                    }
+                }
+            }
             .padding()
-            NavigationLink(destination: RegisterEmoji(viewModel: RegisterEmojiViewModel())) {
+            Button {
+                showEmojiView.toggle()
+            } label: {
                 Text("Register new emoji")
             }
             .padding()
@@ -38,15 +50,25 @@ struct DrawRecognizer: View {
                     .font(Font.largeTitle)
             }
             Spacer()
+            NavigationLink(destination: registerEmojiView, isActive: $showEmojiView, label: {})
         }
     }
     
     // MARK: - Private
     
     private let drawShapesViewModel = DrawShapesViewModel()
+    @State private var showEmojiView = false
+    
+    private var registerEmojiView: some View {
+        RegisterEmoji(viewModel: RegisterEmojiViewModel())
+    }
     
     private func resetModel() {
         viewModel.resetModel()
+    }
+    
+    private func updateModel() {
+        viewModel.updateModel()
     }
     
     private func showEmoji() {

@@ -45,6 +45,8 @@ class RegisterEmojiViewModel: ObservableObject {
         print("selected \(emoji)")
         selectedEmoji = emoji
         showPicker = false
+        closePage = false
+        iterations = 0
         drawTitle = "Draw in the space below"
     }
     

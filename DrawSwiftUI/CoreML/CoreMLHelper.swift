@@ -17,6 +17,18 @@ class CoreMLHelper {
         reloadModel()
     }
     
+    func commitUpdates(completion: @escaping() -> Void) {
+        let batch = MLArrayBatchProvider(array: featuresToUpdate)
+        modelUpdater.updateModel(withData: batch) { success in
+            if success {
+                print("model updated")
+                self.featuresToUpdate = []
+                self.reloadModel()
+            }
+            completion()
+        }
+    }
+    
     func predictString(fromImage cgImage:CGImage) -> String? {
         guard let model = currentModel,
               let imageConstraint = imageConstraint,
@@ -46,15 +58,22 @@ class CoreMLHelper {
             completion()
             return
         }
-        let batch = Self.getBatchProvider(fromImages: images,
+        
+        let features = Self.getFeatureProviders(fromImages: images, constraint: constraint, outputString: forValue)
+        self.featuresToUpdate.append(contentsOf: features)
+        completion()
+        
+        /*let batch = Self.getBatchProvider(fromImages: images,
                                                  constraint: constraint,
                                                  outputString: forValue)
+        
+        
         modelUpdater.updateModel(withData: batch) { success in
             if success {
                 self.reloadModel()
             }
             completion()
-        }
+        }*/
     }
     
     // MARK: - Private
@@ -70,6 +89,7 @@ class CoreMLHelper {
         return nil
     }
     
+    private var featuresToUpdate:[MLFeatureProvider] = []
     private var currentModel:UpdatableDrawingClassifier?
     private let modelUpdater:ModelUpdater
     
@@ -105,8 +125,6 @@ class CoreMLHelper {
         let inputName = "drawing"
         let outputName = "label"
         
-        var i = 0
-                
         for image in images {
             if let inputValue = try? MLFeatureValue(cgImage: image, constraint: constraint) {
                 let outputValue = MLFeatureValue(string: outputString)
@@ -118,9 +136,31 @@ class CoreMLHelper {
                     featureProviders.append(provider)
                 }
             }
-            i += 1
         }
         
        return MLArrayBatchProvider(array: featureProviders)
+    }
+    
+    private static func getFeatureProviders(fromImages images:[CGImage],
+                                            constraint:MLImageConstraint,
+                                            outputString:String) -> [MLFeatureProvider] {
+        var featureProviders = [MLFeatureProvider]()
+
+        let inputName = "drawing"
+        let outputName = "label"
+
+        for image in images {
+            if let inputValue = try? MLFeatureValue(cgImage: image, constraint: constraint) {
+                let outputValue = MLFeatureValue(string: outputString)
+                
+                let dataPointFeatures: [String: MLFeatureValue] = [inputName: inputValue,
+                                                                   outputName: outputValue]
+                
+                if let provider = try? MLDictionaryFeatureProvider(dictionary: dataPointFeatures) {
+                    featureProviders.append(provider)
+                }
+            }
+        }
+        return featureProviders
     }
 }
